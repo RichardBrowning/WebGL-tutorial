@@ -36,7 +36,6 @@ var draw_type=2;
    ////////////////    Initialize VBO  ////////////////////////
 
     function initBuffers() {
-
         squareVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         vertices = [
@@ -44,7 +43,6 @@ var draw_type=2;
 		    -50,  50,  0, 
             -50, -50,  0,
 	        50, -50,  0,
-
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.vertexSize = 3;
@@ -87,7 +85,7 @@ var draw_type=2;
         mvMatrix = mat4.rotate(mvMatrix, degToRad(Z_angle), [0, 0, 1]); 
 
         mat4.identity(pMatrix); 
-        mat4.ortho(0, 100, 0, 100, -1, 1, pMatrix); //orthographic projection, range: [-80, 100]x[-80, 100]
+        mat4.ortho(-100, 100, -100, 100, -1, 1, pMatrix); //orthographic projection, range: [-100, 100]x[-100, 100]
 
         var offset = 0; 
         var stride = 0; 
@@ -98,62 +96,59 @@ var draw_type=2;
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,squareVertexColorBuffer.vertexSize, gl.FLOAT, false, stride, offset);
 
-       gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-       gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
 
 	    if (draw_type==2) gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numVertices);
 	    else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices);	
         else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, squareVertexPositionBuffer.numVertices);
-
     }
 
 
     ///////////////////////////////////////////////////////////////
 
-     var lastMouseX = 0, lastMouseY = 0;
+    var lastMouseX = 0, lastMouseY = 0;
 
     ///////////////////////////////////////////////////////////////
 
-     function onDocumentMouseDown( event ) {
-          event.preventDefault();
-          document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.addEventListener( 'mouseout', onDocumentMouseOut, false );
-          var mouseX = event.clientX;
-          var mouseY = event.clientY;
+    function onDocumentMouseDown( event ) {
+        event.preventDefault();
+        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+        document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+        var mouseX = event.clientX;
+        var mouseY = event.clientY;
 
-          lastMouseX = mouseX;
-          lastMouseY = mouseY; 
+        lastMouseX = mouseX;
+        lastMouseY = mouseY; 
+    }
 
-      }
+    function onDocumentMouseMove( event ) {
+        var mouseX = event.clientX;
+        var mouseY = event.ClientY; 
 
-     function onDocumentMouseMove( event ) {
-          var mouseX = event.clientX;
-          var mouseY = event.ClientY; 
+        var diffX = mouseX - lastMouseX;
+        var diffY = mouseY - lastMouseY;
 
-          var diffX = mouseX - lastMouseX;
-          var diffY = mouseY - lastMouseY;
+        Z_angle = Z_angle + diffX/5;
 
-          Z_angle = Z_angle + diffX/5;
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
 
-          lastMouseX = mouseX;
-          lastMouseY = mouseY;
+        drawScene();
+    }
 
-          drawScene();
-     }
+    function onDocumentMouseUp( event ) {
+        document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+        document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+    }
 
-     function onDocumentMouseUp( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-     }
-
-     function onDocumentMouseOut( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-     }
+    function onDocumentMouseOut( event ) {
+        document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+        document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+    }
 
     ///////////////////////////////////////////////////////////////
 
@@ -173,28 +168,22 @@ var draw_type=2;
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-       document.addEventListener('mousedown', onDocumentMouseDown,
-       false); 
+        document.addEventListener('mousedown', onDocumentMouseDown, false); 
 
         drawScene();
     }
 
-function BG(red, green, blue) {
+    function BG(red, green, blue) {
+        gl.clearColor(red, green, blue, 1.0);
+        drawScene(); 
+    } 
 
-    gl.clearColor(red, green, blue, 1.0);
-    drawScene(); 
+    function redraw() {
+        Z_angle = 0; 
+        drawScene();
+    }
 
-} 
-
-function redraw() {
-    Z_angle = 0; 
-    drawScene();
-}
-    
-
-function geometry(type) {
-
-    draw_type = type;
-    drawScene();
-
-} 
+    function geometry(type) {
+        draw_type = type;
+        drawScene();
+    } 
