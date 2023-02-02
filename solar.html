@@ -1,0 +1,332 @@
+<html>
+	<head>
+		<script type="text/javascript">
+			var gl;
+			const nTriangles = 2;
+			const nVertices = 4;
+
+			var sunTrans = [0.0, 0.0];
+			var sunScale = [0.25, 0.25];
+			var sunRot = 30;
+
+			var earthTrans = [2.0, 0.0];
+			var earthScale = [0.5, 0.5];
+			var earthRot = 60;
+
+			var moonTrans = [2.0, 0.0];
+			var moonScale = [0.25, 0.25];
+			var moonRot = 45;
+
+			var use_tex = 0;
+
+			let matmul = function(A, B) {
+				var C = new Float32Array(16);
+				for (var i=0; i<4; i++) {
+					for (var j=0; j<4; j++) {
+						var dot = 0;
+						for (var k=0; k<4; k++)
+							dot += A[i+k*4] * B[k+j*4]; // dot += A[i][k] * B[k][j];
+							C[i+j*4] = dot; // C[i][j] = dot;
+					}
+				}
+				return C;
+			}
+
+			let matrot2 = function(theta) {
+				rad = theta * Math.PI / 180.0;
+				return new Float32Array([
+						Math.cos(rad), Math.sin(rad), 0.0, 0.0, 
+						-Math.sin(rad), Math.cos(rad), 0.0, 0.0,
+						0.0, 0.0, 1.0, 0.0,
+						0.0, 0.0, 0.0, 1.0
+					]);
+			}
+
+			let mattrans2 = function(delta) {
+				return new Float32Array([
+						1.0, 0.0, 0.0, 0.0, 
+						0.0, 1.0, 0.0, 0.0, 
+						0.0, 0.0, 1.0, 0.0, 
+						delta[0], delta[1], 0.0, 1.0
+					]);
+			}
+
+			let matscale2 = function(scales) {
+				return new Float32Array([
+						scales[0], 0.0, 0.0, 0.0, 
+						0.0, scales[1], 0.0, 0.0, 
+						0.0, 0.0, 1.0, 0.0, 
+						0.0, 0.0, 0.0, 1.0
+					]);
+			}
+
+			let mateye = function() {
+				return new Float32Array([1.0, 0.0, 0.0, 0.0, 
+        	0.0, 1.0, 0.0, 0.0, 
+        	0.0, 0.0, 1.0, 0.0,
+        	0.0, 0.0, 0.0, 1.0]);
+			}
+
+			function isPowerOf2(value) {
+			  return (value & (value - 1)) === 0;
+			}
+
+			function loadTexture(gl, url) { // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL
+			  const texture = gl.createTexture();
+			  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+			  // Because images have to be downloaded over the internet
+			  // they might take a moment until they are ready.
+			  // Until then put a single pixel in the texture so we can
+			  // use it immediately. When the image has finished downloading
+			  // we'll update the texture with the contents of the image.
+			  const level = 0;
+			  const internalFormat = gl.RGBA;
+			  const width = 1;
+			  const height = 1;
+			  const border = 0;
+			  const srcFormat = gl.RGBA;
+			  const srcType = gl.UNSIGNED_BYTE;
+			  const pixel = new Uint8Array([0, 0, 255, 255]); // opaque blue
+			  gl.texImage2D(
+			    gl.TEXTURE_2D,
+			    level,
+			    internalFormat,
+			    width,
+			    height,
+			    border,
+			    srcFormat,
+			    srcType,
+			    pixel
+			  );
+
+			  const image = new Image();
+			  image.onload = () => {
+			    gl.bindTexture(gl.TEXTURE_2D, texture);
+			    gl.texImage2D(
+			      gl.TEXTURE_2D,
+			      level,
+			      internalFormat,
+			      srcFormat,
+			      srcType,
+			      image
+			    );
+
+			    // WebGL1 has different requirements for power of 2 images
+			    // vs. non power of 2 images so check if the image is a
+			    // power of 2 in both dimensions.
+			    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+			      // Yes, it's a power of 2. Generate mips.
+			      gl.generateMipmap(gl.TEXTURE_2D);
+			    } else {
+			      // No, it's not a power of 2. Turn off mips and set
+			      // wrapping to clamp to edge
+			      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			    }
+			  };
+			  image.src = url;
+
+			  return texture;
+			}
+
+			let draw = function() {
+				gl.clearColor(0, 0, 0, 1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				// gl.enable(gl.BLEND);
+				// gl.blendFunc(gl.SRC_COLOR, gl.DST_COLOR);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+        gl.vertexAttribPointer(a_posAttribute, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+        gl.vertexAttribPointer(a_colorAttribute, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);        
+        gl.vertexAttribPointer(a_texCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.uniform1i(u_tex, 0);
+        gl.uniform1i(u_use_tex, use_tex);
+
+        // draw sun
+				Msun = mateye(); // load identity
+				Msun = matmul(Msun, mattrans2(sunTrans));
+				Msun = matmul(Msun, matscale2(sunScale));
+				Msun = matmul(Msun, matrot2(sunRot));
+        gl.uniformMatrix4fv(u_M, false, Msun);
+        gl.bindTexture(gl.TEXTURE_2D, texSun);
+        gl.drawElements(gl.TRIANGLES, nTriangles*3, gl.UNSIGNED_SHORT, 0);
+
+        // draw earth
+        let Mearth = Msun;
+        Mearth = matmul(Mearth, mattrans2(earthTrans));
+        Mearth = matmul(Mearth, matscale2(earthScale));
+        Mearth = matmul(Mearth, matrot2(earthRot));
+        gl.uniformMatrix4fv(u_M, false, Mearth);
+        gl.bindTexture(gl.TEXTURE_2D, texEarth);
+        gl.drawElements(gl.TRIANGLES, nTriangles*3, gl.UNSIGNED_SHORT, 0);
+
+        // draw moon
+        let Mmoon = Mearth;
+        Mmoon = matmul(Mmoon, mattrans2(moonTrans));
+        Mmoon = matmul(Mmoon, matscale2(moonScale));
+        Mmoon = matmul(Mmoon, matrot2(moonRot));
+        gl.uniformMatrix4fv(u_M, false, Mmoon);
+        gl.bindTexture(gl.TEXTURE_2D, texMoon);
+        gl.drawElements(gl.TRIANGLES, nTriangles*3, gl.UNSIGNED_SHORT, 0);
+			}
+
+			function initGL() {
+				let canvas = document.getElementById("glcanvas1");
+				try {
+					gl = canvas.getContext("webgl2");
+				} catch(e) {
+					console.log(e);
+				}
+        // console.log(gl);
+
+				program = gl.createProgram();
+
+				vertexShader = gl.createShader(gl.VERTEX_SHADER);
+				gl.shaderSource(vertexShader, "precision mediump float; \
+					attribute vec3 apos;\
+          attribute vec3 acolor;\
+          attribute vec2 atexCoord;\
+          varying vec3 vcolor;\
+          varying vec2 vtexCoord;\
+          uniform mat4 M;\
+          void main() {\
+          	gl_Position = M * vec4(apos, 1.0);\
+          	vcolor = acolor;\
+          	vtexCoord = atexCoord;\
+         	}");
+				gl.compileShader(vertexShader);
+
+				if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS))
+					console.log(gl.getShaderInfoLog(vertexShader));
+
+        // the precision line is important; shaders won't link without this line 
+				fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+				gl.shaderSource(fragmentShader, "precision mediump float; \
+          varying vec3 vcolor;\
+          varying vec2 vtexCoord;\
+          uniform sampler2D tex;\
+          uniform int use_tex;\
+          void main() {\
+          	if (use_tex == 1)\
+	          	gl_FragColor = vec4(texture2D(tex, vtexCoord));\
+	          else \
+          		gl_FragColor = vec4(vcolor, 1);\
+          }");
+				gl.compileShader(fragmentShader);
+				if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS))
+					console.log(gl.getShaderInfoLog(fragmentShader));
+
+				gl.attachShader(program, vertexShader);
+				gl.attachShader(program, fragmentShader);
+				gl.linkProgram(program);
+				gl.useProgram(program);
+
+				a_posAttribute = gl.getAttribLocation(program, "apos");
+				gl.enableVertexAttribArray(a_posAttribute);
+
+        a_colorAttribute = gl.getAttribLocation(program, "acolor");
+        gl.enableVertexAttribArray(a_colorAttribute);
+
+        a_texCoordAttribute = gl.getAttribLocation(program, "atexCoord");
+        gl.enableVertexAttribArray(a_texCoordAttribute);
+
+        u_M = gl.getUniformLocation(program, "M");
+        u_tex = gl.getUniformLocation(program, "tex");
+        u_use_tex = gl.getUniformLocation(program, "use_tex");
+
+				vertexPositionBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+				vertices = [1.0, 1.0, 0.0,
+					-1.0, 1.0, 0.0,
+					 1.0,-1.0, 0.0,
+					-1.0,-1.0, 0.0];
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+        vertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+        colors = [1.0, 1.0, 1.0, 
+          1.0, 0.0, 0.0, 
+          1.0, 1.0, 0.0, 
+          0.0, 1.0, 0.0];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+        vertexTexCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
+        texCoords = [0.0, 0.0, 
+          1.0, 0.0, 
+          0.0, 1.0, 
+          1.0, 1.0];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+
+				vertexIndexBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+				indices = [0, 1, 2, 1, 3, 2];
+				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+				texSun = loadTexture(gl, "sun.png");
+				texEarth = loadTexture(gl, "earth.png");
+				texMoon = loadTexture(gl, "moon.png");
+
+				updateTransformations();
+        // draw();
+			}
+
+			let updateTransformations = function() {
+        var vSunTrans = parseFloat(document.getElementById("sunTrans").value);
+        var vSunScale = parseFloat(document.getElementById("sunScale").value);
+        var vSunRot = parseFloat(document.getElementById("sunRot").value);
+        var vEarthTrans = parseFloat(document.getElementById("earthTrans").value);
+        var vEarthScale = parseFloat(document.getElementById("earthScale").value);
+        var vEarthRot = parseFloat(document.getElementById("earthRot").value);
+        var vMoonTrans = parseFloat(document.getElementById("moonTrans").value);
+        var vMoonScale = parseFloat(document.getElementById("moonScale").value);
+        var vMoonRot = parseFloat(document.getElementById("moonRot").value);
+
+        sunTrans = [vSunTrans, 0.0];
+        sunScale = [vSunScale, vSunScale];
+        sunRot = vSunRot;
+
+        earthTrans = [vEarthTrans, 0.0];
+        earthScale = [vEarthScale, vEarthScale];
+        earthRot = vEarthRot;
+
+        moonTrans = [vMoonTrans, 0.0];
+        moonScale = [vMoonScale, vMoonScale];
+        moonRot = vMoonRot;
+
+        use_tex = document.getElementById("use_tex").checked ? 1 : 0;
+
+        draw();
+			}
+		</script>
+	</head>
+	<body onload="initGL()">
+		<canvas width="600" height="600" id="glcanvas1"></canvas>
+		<table>
+			<tr>
+				<td>sunTrans</td><td><input type="number" id="sunTrans" step="0.1" value="0" onchange="updateTransformations();"></td>
+				<td>sunScale</td><td><input type="number" id="sunScale" step="0.1" value="0.25" onchange="updateTransformations();"></td>
+				<td>sunRot</td><td><input type="number" id="sunRot" value="30" onchange="updateTransformations();"></td>
+			</tr>
+			<tr>
+				<td>earthTrans</td><td><input type="number" id="earthTrans" step="0.1" value="1.5" onchange="updateTransformations();"></td>
+				<td>earthScale</td><td><input type="number" id="earthScale" step="0.1" value="0.5" onchange="updateTransformations();"></td>
+				<td>earthRot</td><td><input type="number" id="earthRot" value="30" onchange="updateTransformations();"></td>
+			</tr>
+			<tr>
+				<td>moonTrans</td><td><input type="number" id="moonTrans" step="0.1" value="1.5" onchange="updateTransformations();"></td>
+				<td>moonScale</td><td><input type="number" id="moonScale" step="0.1" value="0.5" onchange="updateTransformations();"></td>
+				<td>moonRot</td><td><input type="number" id="moonRot" value="45" onchange="updateTransformations();"></td>
+			</tr>
+		</table>
+		<label for="use_tex">Use texture?</label><input type="checkbox" id="use_tex" onchange="updateTransformations();">
+	</body>
+</html>
