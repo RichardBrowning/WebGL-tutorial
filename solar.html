@@ -151,7 +151,7 @@
         gl.uniform1i(u_use_tex, use_tex);
 
         // draw sun
-				Msun = mateye(); // load identity
+				Msun = mateye(); // load identity matrix
 				Msun = matmul(Msun, mattrans2(sunTrans));
 				Msun = matmul(Msun, matscale2(sunScale));
 				Msun = matmul(Msun, matrot2(sunRot));
