@@ -29,8 +29,7 @@
     void main(void) {
         gl_PointSize = 10.0; 
 
-        //gl_Position = uMVMatrix*vec4(aVertexPosition, 1.0);
-        gl_Position = uPMatrix* uMVMatrix*vec4(aVertexPosition, 1.0);
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
         vColor = vec4(aVertexColor,1.0); 
     }
@@ -45,7 +44,13 @@
 
 
 <body onload="webGLStart();">
-    <canvas id="code03-canvas"style="border:none;"width="700"height="700"></canvas>
+    <canvas id="code03-canvas"style="border:none;"width="400"height="400"></canvas>
+
+    <h4> Projection: </h4>
+    <label for="input-left">Left: </label><input type="number" id="input-left" value="-100" onchange="updateProj()">
+    <label for="input-right">Right: <label><input type="number" id="input-right" value="100" onchange="updateProj()"><br>
+    <label for="input-bottom">Bottom: </label><input type="number" id="input-bottom" value="-100" onchange="updateProj()">
+    <label for="input-top">Top: <label><input type="number" id="input-top" value="100" onchange="updateProj()"><br>
 
     <h4> Geometry:  </h4>
     <button  onclick="geometry(0)"> POINTS</button>
@@ -59,6 +64,9 @@
     <button  onclick="BG(0.5,0.5,0.5)"> Grey</button>
     <button  onclick="BG(0,0,0)"> Black</button>
     <button  onclick="BG(1,1,1)"> White</button>
+
+    <button  onclick="clearAll();"> Clear</button>
+    <button  onclick="drawScene();"> Redraw</button>
 
     <div>
     <h4>

@@ -70,7 +70,7 @@ function find_range(positions)
 function initJSON()
 {
     let request = new XMLHttpRequest();
-    request.open("GET", "teapot.json");    
+    request.open("GET", "mario.json");    
 //    request.open("GET", "http://www.cse.ohio-state.edu/~hwshen/5542/Site/WebGL_files/teapot.json");    
     request.onreadystatechange =
       function () {
@@ -82,21 +82,79 @@ function initJSON()
     request.send();
 }
 
+function computeSurfaceNormals(verts, faces)
+{
+    var surfaceNormals = new Float32Array(faces.length);
+    const npts = verts.length / 3;
+    const ntris = faces.length / 3;
+    for (var i = 0; i < ntris; i ++) {
+        var tri = [faces[i*3], faces[i*3+1], faces[i*3+2]];
+        // var tri = [faces[i*11+1], faces[i*11+2], faces[i*11+3]];
+        var p0 = [verts[tri[0]*3], verts[tri[0]*3+1], verts[tri[0]*3+2]];
+        var p1 = [verts[tri[1]*3], verts[tri[1]*3+1], verts[tri[1]*3+2]];
+        var p2 = [verts[tri[2]*3], verts[tri[2]*3+1], verts[tri[2]*3+2]];
+
+        var u = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+        var v = [p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]];
+
+        surfaceNormals[i*3] = u[1]*v[2] - u[2]*v[1];
+        surfaceNormals[i*3+1] = u[2]*v[0] - u[0]*v[2];
+        surfaceNormals[i*3+2] = u[0]*v[1] - u[1]*v[0];
+    }
+    return surfaceNormals;
+}
+
+function computeVertexNormals(verts, faces, surfaceNormals)
+{
+    var vertexNormals = new Float32Array(verts.length);
+    const npts = verts.length / 3;
+    const ntris = faces.length / 3;
+    for (var i = 0; i < ntris; i++) {
+        // var tri = [faces[i*11+1], faces[i*11+2], faces[i*11+3]];
+        var tri = [faces[i*3], faces[i*3+1], faces[i*3+2]];
+
+        for (var t = 0; t < 3; t ++) {
+            for (var j = 0; j < 3; j ++) {
+                vertexNormals[tri[t]*3+j] = vertexNormals[tri[t]*3+j] + surfaceNormals[i*3+j];
+            }
+        }
+    }
+
+    for (var i = 0; i < npts; i ++) {
+        var n = [vertexNormals[i*3], vertexNormals[i*3+1], vertexNormals[i*3+2]];
+        var mag = Math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+        for (var j = 0; j < 3; j ++)
+            vertexNormals[i*3+j] = vertexNormals[i*3+j] / mag;
+    }
+    return vertexNormals;
+}
 
 function handleLoadedTeapot(teapotData)
 {
     console.log(" in hand LoadedTeapot"); 
+    console.log(teapotData);
+
     teapotVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(teapotData.vertexPositions),gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(teapotData.vertices),gl.STATIC_DRAW);
     teapotVertexPositionBuffer.itemSize=3;
-    teapotVertexPositionBuffer.numItems=teapotData.vertexPositions.length/3; 
+    teapotVertexPositionBuffer.numItems=teapotData.vertices.length/3; 
+
+    var faces = new Uint16Array(teapotData.faces.length/11*3);
+    for (var i = 0; i < teapotData.faces.length/11; i ++) {
+        faces[i*3] = teapotData.faces[i*11+1];
+        faces[i*3+1] = teapotData.faces[i*11+2];
+        faces[i*3+2] = teapotData.faces[i*11+3];
+    }
+
+    var surfaceNormals = computeSurfaceNormals(teapotData.vertices, faces);
+    var vertexNormals = computeVertexNormals(teapotData.vertices, faces, surfaceNormals);
     
     teapotVertexNormalBuffer =  gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER,  teapotVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(teapotData.vertexNormals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
     teapotVertexNormalBuffer.itemSize=3;
-    teapotVertexNormalBuffer.numItems= teapotData.vertexNormals.length/3;
+    teapotVertexNormalBuffer.numItems= vertexNormals.length/3;
 
     /*
     teapotVertexTextureCoordBuffer=gl.createBuffer();
@@ -109,20 +167,19 @@ function handleLoadedTeapot(teapotData)
 
     teapotVertexIndexBuffer= gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(teapotData.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, faces, gl.STATIC_DRAW);
     teapotVertexIndexBuffer.itemSize=1;
-    teapotVertexIndexBuffer.numItems=teapotData.indices.length;
+    teapotVertexIndexBuffer.numItems=faces.length;
 
-    find_range(teapotData.vertexPositions);
+    // find_range(faces.vertexPositions);
 
-    console.log("*****xmin = "+xmin + "xmax = "+xmax);
-    console.log("*****ymin = "+ymin + "ymax = "+ymax);
-    console.log("*****zmin = "+zmin + "zmax = "+zmax);       
+    // console.log("*****xmin = "+xmin + "xmax = "+xmax);
+    // console.log("*****ymin = "+ymin + "ymax = "+ymax);
+    // console.log("*****zmin = "+zmin + "zmax = "+zmax);       
     
-    teapotVertexColorBuffer = teapotVertexNormalBuffer;
+    // teapotVertexColorBuffer = teapotVertexNormalBuffer;
 
     drawScene();
-
 }
 
 
@@ -166,9 +223,9 @@ function drawScene() {
         mat4.identity(mMatrix);
 
 
-        mMatrix = mat4.scale(mMatrix, [1/10, 1/10, 1/10]); 
+        // mMatrix = mat4.scale(mMatrix, [1/10, 1/10, 1/10]); 
 	
-        mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 1]);   // now set up the model matrix
+        mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 0]);   // now set up the model matrix
 
 	mat4.identity(nMatrix); 
 	nMatrix = mat4.multiply(nMatrix, vMatrix);
@@ -195,8 +252,8 @@ function drawScene() {
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexColorBuffer);  
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,teapotVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    // gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexColorBuffer);  
+	// gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,teapotVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer); 	
@@ -271,8 +328,8 @@ function drawScene() {
         shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
         gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 	
-        shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-        gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+        // shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+        // gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 	
         shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
         shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
@@ -293,13 +350,13 @@ function drawScene() {
 	    initJSON(); 	
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        console.log('start! ');
-        console.error('I hope no error ....');
+        // console.log('start! ');
+        // console.error('I hope no error ....');
 
        document.addEventListener('mousedown', onDocumentMouseDown,
        false); 
 
-	console.error("draw");
+	// console.error("draw");
         drawScene();
     }
 
