@@ -65,13 +65,14 @@ void main(void) {
         else
         specular = vec4(0,0,0,1);  
 
-        // vec2 tc = vec2(vTextureCoord.s / vTextureCoord.w, vTextureCoord.t / vTextureCoord.w);
-        // vec4 texColor = texture2D(tex, tc);
+        vec2 tc = vec2(vTextureCoord.s / vTextureCoord.w, vTextureCoord.t / vTextureCoord.w);
+        vec4 texColor = texture2D(tex, tc);
         // vec4 texColor = texture2DProj(tex, vTextureCoord);
 
-        vec4 texColor = texture2D(tex, vTextureCoord.st);
+        // vec4 texColor = texture2D(tex, vTextureCoord.st);
 
         gl_FragColor = texColor + ambient + diffuse + specular;
+        // gl_FragColor = vec4(light_vector, 1.0); // diffuse;
         // gl_FragColor = texColor;
         // gl_FragColor = vec4(v_normal, 1.0);
 	      // gl_FragColor = vColor;
@@ -114,7 +115,7 @@ precision mediump float;
         eye_pos = uVMatrix*uMMatrix*vec4(aVertexPosition, 1.0);
 
       v_normal =normalize(vec3(uNMatrix*vec4(aVertexNormal,0.0)));
-      gl_Position = uPMatrix*uVMatrix*uMMatrix*vec4(aVertexPosition, 1.0);
+      gl_Position = uPMatrix*uVMatrix*uMMatrix * vec4(aVertexPosition, 1.0);
 
 //      vColor = ambient+diffuse+specular;
 //      vColor = vec4(eye_vector, 1.0); 
@@ -122,9 +123,10 @@ precision mediump float;
 //      vColor = vec4(aVertexNormal, 1.0);
       vColor = vec4(v_normal, 1.0);
 
-      vTextureCoord = vec4(aVertexTextureCoord.st, 0.0, 1.0);
-      // float w = gl_Position.w;
-      // vTextureCoord = vec4(aVertexTextureCoord.s / w, aVertexTextureCoord.t / w, 1.0, 1.0 / w);
+      // vTextureCoord = vec4(aVertexTextureCoord.st, 0.0, 1.0);
+      
+      float w = gl_Position.w;
+      vTextureCoord = vec4(aVertexTextureCoord.s / w, aVertexTextureCoord.t / w, 1.0, 1.0 / w);
     }
 </script>
 

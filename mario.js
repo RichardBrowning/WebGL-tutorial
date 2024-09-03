@@ -25,7 +25,7 @@ var draw_type=2;
 
     function initGL(canvas) {
         try {
-            gl = canvas.getContext("experimental-webgl");
+            gl = canvas.getContext("webgl2");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
         } catch (e) {
@@ -38,10 +38,10 @@ var draw_type=2;
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
-var teapotVertexPositionBuffer;
-var teapotVertexNormalBuffer; 
-var teapotVertexTextureCoordBuffer; 
-var teapotVertexIndexBuffer;
+var marioVertexPositionBuffer;
+var marioVertexNormalBuffer; 
+var marioVertexTextureCoordBuffer; 
+var marioVertexIndexBuffer;
 
 var xmin, xmax, ymin, ymax, zmin, zmax;
 
@@ -71,7 +71,7 @@ function initJSON()
 {
     let request = new XMLHttpRequest();
     request.open("GET", "mario.json");    
-//    request.open("GET", "http://www.cse.ohio-state.edu/~hwshen/5542/Site/WebGL_files/teapot.json");    
+//    request.open("GET", "http://www.cse.ohio-state.edu/~hwshen/5542/Site/WebGL_files/mario.json");    
     request.onreadystatechange =
       function () {
           if (request.readyState == 4) {
@@ -129,47 +129,47 @@ function computeVertexNormals(verts, faces, surfaceNormals)
     return vertexNormals;
 }
 
-function handleLoadedTeapot(teapotData)
+function handleLoadedTeapot(marioData)
 {
     console.log(" in hand LoadedTeapot"); 
-    console.log(teapotData);
+    console.log(marioData);
 
-    teapotVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(teapotData.vertices),gl.STATIC_DRAW);
-    teapotVertexPositionBuffer.itemSize=3;
-    teapotVertexPositionBuffer.numItems=teapotData.vertices.length/3; 
+    marioVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, marioVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(marioData.vertices),gl.STATIC_DRAW);
+    marioVertexPositionBuffer.itemSize=3;
+    marioVertexPositionBuffer.numItems=marioData.vertices.length/3; 
 
-    var faces = new Uint16Array(teapotData.faces.length/11*3);
-    for (var i = 0; i < teapotData.faces.length/11; i ++) {
-        faces[i*3] = teapotData.faces[i*11+1];
-        faces[i*3+1] = teapotData.faces[i*11+2];
-        faces[i*3+2] = teapotData.faces[i*11+3];
+    var faces = new Uint16Array(marioData.faces.length/11*3);
+    for (var i = 0; i < marioData.faces.length/11; i ++) {
+        faces[i*3] = marioData.faces[i*11+1];
+        faces[i*3+1] = marioData.faces[i*11+2];
+        faces[i*3+2] = marioData.faces[i*11+3];
     }
 
-    var surfaceNormals = computeSurfaceNormals(teapotData.vertices, faces);
-    var vertexNormals = computeVertexNormals(teapotData.vertices, faces, surfaceNormals);
+    var surfaceNormals = computeSurfaceNormals(marioData.vertices, faces);
+    var vertexNormals = computeVertexNormals(marioData.vertices, faces, surfaceNormals);
     
-    teapotVertexNormalBuffer =  gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER,  teapotVertexNormalBuffer);
+    marioVertexNormalBuffer =  gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,  marioVertexNormalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
-    teapotVertexNormalBuffer.itemSize=3;
-    teapotVertexNormalBuffer.numItems= vertexNormals.length/3;
+    marioVertexNormalBuffer.itemSize=3;
+    marioVertexNormalBuffer.numItems= vertexNormals.length/3;
 
     /*
-    teapotVertexTextureCoordBuffer=gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(teapotData.vertexTextureCoords),
+    marioVertexTextureCoordBuffer=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, marioVertexTextureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(marioData.vertexTextureCoords),
 		  gl.STATIC_DRAW);
-    teapotVertexTextureCoordBuffer.itemSize=2;
-    teapotVertexTextureCoordBuffer.numItems=teapotData.vertexTextureCoords.length/2;
+    marioVertexTextureCoordBuffer.itemSize=2;
+    marioVertexTextureCoordBuffer.numItems=marioData.vertexTextureCoords.length/2;
     */
 
-    teapotVertexIndexBuffer= gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
+    marioVertexIndexBuffer= gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, marioVertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, faces, gl.STATIC_DRAW);
-    teapotVertexIndexBuffer.itemSize=1;
-    teapotVertexIndexBuffer.numItems=faces.length;
+    marioVertexIndexBuffer.itemSize=1;
+    marioVertexIndexBuffer.numItems=faces.length;
 
     // find_range(faces.vertexPositions);
 
@@ -177,7 +177,7 @@ function handleLoadedTeapot(teapotData)
     // console.log("*****ymin = "+ymin + "ymax = "+ymax);
     // console.log("*****zmin = "+zmin + "zmax = "+zmax);       
     
-    // teapotVertexColorBuffer = teapotVertexNormalBuffer;
+    // marioVertexColorBuffer = marioVertexNormalBuffer;
 
     drawScene();
 }
@@ -212,7 +212,7 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     
-    if (teapotVertexPositionBuffer == null || teapotVertexNormalBuffer == null || teapotVertexIndexBuffer == null) {
+    if (marioVertexPositionBuffer == null || marioVertexNormalBuffer == null || marioVertexIndexBuffer == null) {
             return;
         }
 
@@ -246,23 +246,23 @@ function drawScene() {
 	gl.uniform4f(shaderProgram.light_specularUniform, light_specular[0], light_specular[1], light_specular[2],1.0); 
 
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, marioVertexPositionBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, marioVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, marioVertexNormalBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, marioVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    // gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexColorBuffer);  
-	// gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,teapotVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    // gl.bindBuffer(gl.ARRAY_BUFFER, marioVertexColorBuffer);  
+	// gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,marioVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer); 	
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, marioVertexIndexBuffer); 	
 
     setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
 
-	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, teapotVertexPositionBuffer.numItems);	
-    else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, teapotVertexPositionBuffer.numItems);
-	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0);	
+	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, marioVertexPositionBuffer.numItems);	
+    else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, marioVertexPositionBuffer.numItems);
+	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, marioVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0);	
 
     }
 

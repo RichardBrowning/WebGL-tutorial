@@ -52,14 +52,14 @@ function find_range(positions)
     ymin = ymax = positions[1];
     zmin = zmax = positions[2];
     for (i = 0; i< positions.length/3; i++) {
-	if (positions[i*3] < xmin) xmin = positions[i*3];
-	if (positions[i*3] > xmax) xmax = positions[i*3]; 	
+    if (positions[i*3] < xmin) xmin = positions[i*3];
+    if (positions[i*3] > xmax) xmax = positions[i*3];     
 
-	if (positions[i*3+1] < ymin) ymin = positions[i*3+1];
-	if (positions[i*3+1] > ymax) ymax = positions[i*3+1]; 	
+    if (positions[i*3+1] < ymin) ymin = positions[i*3+1];
+    if (positions[i*3+1] > ymax) ymax = positions[i*3+1];     
 
-	if (positions[i*3+2] < zmin) zmin = positions[i*3+2];
-	if (positions[i*3+2] > zmax) zmax = positions[i*3+2]; 	
+    if (positions[i*3+2] < zmin) zmin = positions[i*3+2];
+    if (positions[i*3+2] > zmax) zmax = positions[i*3+2];     
     }
     console.log("*****xmin = "+xmin + "xmax = "+xmax);
     console.log("*****ymin = "+ymin + "ymax = "+ymax);
@@ -75,7 +75,7 @@ function initJSON()
     request.onreadystatechange =
       function () {
           if (request.readyState == 4) {
-	      console.log("state ="+request.readyState); 
+          console.log("state ="+request.readyState); 
               handleLoadedTeapot(JSON.parse(request.responseText));
         }
       }
@@ -102,7 +102,7 @@ function handleLoadedTeapot(teapotData)
     teapotVertexTextureCoordBuffer=gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(teapotData.vertexTextureCoords),
-		  gl.STATIC_DRAW);
+          gl.STATIC_DRAW);
     teapotVertexTextureCoordBuffer.itemSize=2;
     teapotVertexTextureCoordBuffer.numItems=teapotData.vertexTextureCoords.length/2;
     */
@@ -139,8 +139,8 @@ function handleLoadedTeapot(teapotData)
         gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
         gl.uniformMatrix4fv(shaderProgram.vMatrixUniform, false, vMatrix);
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);	
-	
+        gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);    
+    
     }
 
      function degToRad(degrees) {
@@ -159,53 +159,53 @@ function drawScene() {
             return;
         }
 
-	pMatrix = mat4.perspective(60, 1.0, 0.1, 100, pMatrix);  // set up the projection matrix 
+    pMatrix = mat4.perspective(60, 1.0, 0.1, 100, pMatrix);  // set up the projection matrix 
 
-	vMatrix = mat4.lookAt([0,0,5], [0,0,0], [0,1,0], vMatrix);	// set up the view matrix, multiply into the modelview matrix
+    vMatrix = mat4.lookAt([0,0,5], [0,0,0], [0,1,0], vMatrix);    // set up the view matrix, multiply into the modelview matrix
 
         mat4.identity(mMatrix);
 
 
         mMatrix = mat4.scale(mMatrix, [1/10, 1/10, 1/10]); 
-	
+    
         mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 0]);   // now set up the model matrix
 
-	mat4.identity(nMatrix); 
-	nMatrix = mat4.multiply(nMatrix, vMatrix);
-	nMatrix = mat4.multiply(nMatrix, mMatrix); 	
-	nMatrix = mat4.inverse(nMatrix);
-	nMatrix = mat4.transpose(nMatrix); 
+    mat4.identity(nMatrix); 
+    nMatrix = mat4.multiply(nMatrix, vMatrix);
+    nMatrix = mat4.multiply(nMatrix, mMatrix);     
+    nMatrix = mat4.inverse(nMatrix);
+    nMatrix = mat4.transpose(nMatrix); 
 
         shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
 
-	gl.uniform4f(shaderProgram.light_posUniform,light_pos[0], light_pos[1], light_pos[2], light_pos[3]); 	
-	gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0); 
-	gl.uniform4f(shaderProgram.diffuse_coefUniform, mat_diffuse[0], mat_diffuse[1], mat_diffuse[2], 1.0); 
-	gl.uniform4f(shaderProgram.specular_coefUniform, mat_specular[0], mat_specular[1], mat_specular[2],1.0); 
-	gl.uniform1f(shaderProgram.shininess_coefUniform, mat_shine[0]); 
+    gl.uniform4f(shaderProgram.light_posUniform,light_pos[0], light_pos[1], light_pos[2], light_pos[3]);     
+    gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0); 
+    gl.uniform4f(shaderProgram.diffuse_coefUniform, mat_diffuse[0], mat_diffuse[1], mat_diffuse[2], 1.0); 
+    gl.uniform4f(shaderProgram.specular_coefUniform, mat_specular[0], mat_specular[1], mat_specular[2],1.0); 
+    gl.uniform1f(shaderProgram.shininess_coefUniform, mat_shine[0]); 
 
-	gl.uniform4f(shaderProgram.light_ambientUniform, light_ambient[0], light_ambient[1], light_ambient[2], 1.0); 
-	gl.uniform4f(shaderProgram.light_diffuseUniform, light_diffuse[0], light_diffuse[1], light_diffuse[2], 1.0); 
-	gl.uniform4f(shaderProgram.light_specularUniform, light_specular[0], light_specular[1], light_specular[2],1.0); 
+    gl.uniform4f(shaderProgram.light_ambientUniform, light_ambient[0], light_ambient[1], light_ambient[2], 1.0); 
+    gl.uniform4f(shaderProgram.light_diffuseUniform, light_diffuse[0], light_diffuse[1], light_diffuse[2], 1.0); 
+    gl.uniform4f(shaderProgram.light_specularUniform, light_specular[0], light_specular[1], light_specular[2],1.0); 
 
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexColorBuffer);  
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,teapotVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,teapotVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer); 	
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);     
 
     setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
 
-	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, teapotVertexPositionBuffer.numItems);	
+    if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, teapotVertexPositionBuffer.numItems);    
     else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, teapotVertexPositionBuffer.numItems);
-	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0);	
+    else if (draw_type==2) gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0);    
 
     }
 
@@ -263,34 +263,34 @@ function drawScene() {
         initGL(canvas);
         initShaders();
 
-	    gl.enable(gl.DEPTH_TEST); 
+        gl.enable(gl.DEPTH_TEST); 
 
         shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
         gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
         shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
         gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-	
+    
         shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
         gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-	
+    
         shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
         shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
-	    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");	
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");    
 
         shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
-        shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");	
+        shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");    
         shaderProgram.diffuse_coefUniform = gl.getUniformLocation(shaderProgram, "diffuse_coef");
         shaderProgram.specular_coefUniform = gl.getUniformLocation(shaderProgram, "specular_coef");
         shaderProgram.shininess_coefUniform = gl.getUniformLocation(shaderProgram, "mat_shininess");
 
-        shaderProgram.light_ambientUniform = gl.getUniformLocation(shaderProgram, "light_ambient");	
+        shaderProgram.light_ambientUniform = gl.getUniformLocation(shaderProgram, "light_ambient");    
         shaderProgram.light_diffuseUniform = gl.getUniformLocation(shaderProgram, "light_diffuse");
-        shaderProgram.light_specularUniform = gl.getUniformLocation(shaderProgram, "light_specular");	
+        shaderProgram.light_specularUniform = gl.getUniformLocation(shaderProgram, "light_specular");    
 
 
-	    initJSON(); 	
+        initJSON();     
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         console.log('start! ');
@@ -299,7 +299,7 @@ function drawScene() {
        document.addEventListener('mousedown', onDocumentMouseDown,
        false); 
 
-	console.error("draw");
+    console.error("draw");
         drawScene();
     }
 
