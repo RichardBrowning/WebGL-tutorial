@@ -80,10 +80,10 @@ var draw_type=2;
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
 
-    var vMatrix = mat4.create(); // view matrix
-    var mMatrix = mat4.create();  // model matrix
-    var mvMatrix = mat4.create();  // modelview matrix
-    var pMatrix = mat4.create();  //projection matrix 
+    var vMatrix = glMatrix.mat4.create(); // view matrix
+    var mMatrix = glMatrix.mat4.create();  // model matrix
+    var mvMatrix = glMatrix.mat4.create();  // modelview matrix
+    var pMatrix = glMatrix.mat4.create();  //projection matrix 
     var Z_angle = 0.0;
 
     function setMatrixUniforms() {
@@ -101,17 +101,16 @@ var draw_type=2;
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	    mat4.perspective(60, 1.0, 0.1, 100, pMatrix);  // set up the projection matrix 
+	      glMatrix.mat4.perspective(pMatrix, 45, 1.0, 0.1, 100);  // set up the projection matrix 
 
-        mat4.identity(vMatrix);	
-        vMatrix = mat4.lookAt([0,0,5], [0,0,0], [0,1,0], vMatrix);	// set up the view matrix, multiply into the modelview matrix
+        glMatrix.mat4.identity(vMatrix);	
+        glMatrix.mat4.lookAt(vMatrix, [0,0,5], [0,0,0], [0,1,0]);	// set up the view matrix, multiply into the modelview matrix
 
-        mat4.identity(mMatrix);	
+        glMatrix.mat4.identity(mMatrix);	
 	
         console.log('Z angle = '+ Z_angle); 
-        mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 1]);   // now set up the model matrix 
-
-        mat4.multiply(vMatrix,mMatrix, mvMatrix);  // mvMatrix = vMatrix * mMatrix and is the modelview Matrix 
+        glMatrix.mat4.rotate(mMatrix, mMatrix, degToRad(Z_angle), [0, 1, 1]);   // now set up the model matrix 
+        glMatrix.mat4.multiply(mvMatrix, vMatrix, mMatrix);  // mvMatrix = vMatrix * mMatrix and is the modelview Matrix 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -119,15 +118,14 @@ var draw_type=2;
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,squareVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	// draw elementary arrays - triangle indices 
+        // draw elementary arrays - triangle indices 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareVertexIndexBuffer); 
 
-       setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
+        setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
 
-	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numItems);	
-        else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, squareVertexPositionBuffer.numItems);
-	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, squareVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0); 
-
+        if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numItems);	
+            else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, squareVertexPositionBuffer.numItems);
+        else if (draw_type==2) gl.drawElements(gl.TRIANGLES, squareVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0); 
     }
 
 
