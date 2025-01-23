@@ -193,10 +193,10 @@ function initSQBuffers() {
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
 
-    var mMatrix = mat4.create();  // model matrix
-    var vMatrix = mat4.create(); // view matrix
-    var pMatrix = mat4.create();  //projection matrix
-    var nMatrix = mat4.create();  // normal matrix
+    var mMatrix = glMatrix.mat4.create();  // model matrix
+    var vMatrix = glMatrix.mat4.create(); // view matrix
+    var pMatrix = glMatrix.mat4.create();  //projection matrix
+    var nMatrix = glMatrix.mat4.create();  // normal matrix
     var Z_angle = 60.0;
 
     function setMatrixUniforms() {
@@ -217,33 +217,30 @@ function initSQBuffers() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	pMatrix = mat4.perspective(60, 1.0, 0.1, 100, pMatrix);  // set up the projection matrix 
+        glMatrix.mat4.perspective(pMatrix, 30, 1.0, 0.1, 100);  // set up the projection matrix 
 
-	vMatrix = mat4.lookAt([0,0,5], [0,0,0], [0,1,0], vMatrix);	// set up the view matrix, multiply into the modelview matrix
+	      glMatrix.mat4.lookAt(vMatrix, [0,0,5], [0,0,0], [0,1,0]);	// set up the view matrix, multiply into the modelview matrix
 
-        mat4.identity(mMatrix);	
+        glMatrix.mat4.identity(mMatrix);	
+        glMatrix.mat4.rotate(mMatrix, mMatrix, degToRad(Z_angle), [0, 1, 1]);   // now set up the model matrix
 	
-        mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 1]);   // now set up the model matrix
-
-
-	mat4.identity(nMatrix); 
-	nMatrix = mat4.multiply(nMatrix, vMatrix);
-	nMatrix = mat4.multiply(nMatrix, mMatrix); 	
-	nMatrix = mat4.inverse(nMatrix);
-	nMatrix = mat4.transpose(nMatrix); 
+        glMatrix.mat4.identity(nMatrix); 
+        glMatrix.mat4.multiply(nMatrix, nMatrix, vMatrix);
+        glMatrix.mat4.multiply(nMatrix, nMatrix, mMatrix); 	
+        glMatrix.mat4.invert(nMatrix, nMatrix);
+        glMatrix.mat4.transpose(nMatrix, nMatrix); 
 
         shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
 
+        gl.uniform4f(shaderProgram.light_posUniform,light_pos[0], light_pos[1], light_pos[2], light_pos[3]); 	
+        gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0); 
+        gl.uniform4f(shaderProgram.diffuse_coefUniform, mat_diffuse[0], mat_diffuse[1], mat_diffuse[2], 1.0); 
+        gl.uniform4f(shaderProgram.specular_coefUniform, mat_specular[0], mat_specular[1], mat_specular[2],1.0); 
+        gl.uniform1f(shaderProgram.shininess_coefUniform, mat_shine[0]); 
 
-	gl.uniform4f(shaderProgram.light_posUniform,light_pos[0], light_pos[1], light_pos[2], light_pos[3]); 	
-	gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0); 
-	gl.uniform4f(shaderProgram.diffuse_coefUniform, mat_diffuse[0], mat_diffuse[1], mat_diffuse[2], 1.0); 
-	gl.uniform4f(shaderProgram.specular_coefUniform, mat_specular[0], mat_specular[1], mat_specular[2],1.0); 
-	gl.uniform1f(shaderProgram.shininess_coefUniform, mat_shine[0]); 
-
-	gl.uniform4f(shaderProgram.light_ambientUniform, light_ambient[0], light_ambient[1], light_ambient[2], 1.0); 
-	gl.uniform4f(shaderProgram.light_diffuseUniform, light_diffuse[0], light_diffuse[1], light_diffuse[2], 1.0); 
-	gl.uniform4f(shaderProgram.light_specularUniform, light_specular[0], light_specular[1], light_specular[2],1.0); 
+        gl.uniform4f(shaderProgram.light_ambientUniform, light_ambient[0], light_ambient[1], light_ambient[2], 1.0); 
+        gl.uniform4f(shaderProgram.light_diffuseUniform, light_diffuse[0], light_diffuse[1], light_diffuse[2], 1.0); 
+        gl.uniform4f(shaderProgram.light_specularUniform, light_specular[0], light_specular[1], light_specular[2],1.0); 
 
 	/*
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
@@ -257,18 +254,18 @@ function initSQBuffers() {
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cylinderVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, cylinderVertexNormalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cylinderVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cylinderVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, cylinderVertexColorBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,cylinderVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 
-	// draw elementary arrays - triangle indices 
-	//  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareVertexIndexBuffer);
+        // draw elementary arrays - triangle indices 
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareVertexIndexBuffer);
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderVertexIndexBuffer); 	
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderVertexIndexBuffer); 	
 
-       setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
+        setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
 
 	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, cylinderVertexPositionBuffer.numItems);	
         else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, cylinderVertexPositionBuffer.numItems);
@@ -349,8 +346,8 @@ function initSQBuffers() {
 	
         shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
         shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
-	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");	
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");	
 
         shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
         shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");	
@@ -364,15 +361,12 @@ function initSQBuffers() {
 
 
         initSQBuffers();
-	initCYBuffers(); 
+	      initCYBuffers(); 
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         console.log('start! ');
-        console.error('I hope no error ....');
 
-
-       document.addEventListener('mousedown', onDocumentMouseDown,
-       false); 
+        document.addEventListener('mousedown', onDocumentMouseDown, false); 
 
         drawScene();
     }

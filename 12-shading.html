@@ -7,7 +7,7 @@
 <title>hwshen WebGL &mdash; Gouraud Shading </title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="gl-matrix.js"></script>
 
 <!--  ************** Fragment Shader ************* --> 
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -107,12 +107,12 @@ precision mediump float;
 
         gl_Position = uPMatrix*uVMatrix*uMMatrix*vec4(aVertexPosition, 1.0);
 
-        vColor = ambient+diffuse+specular;
+        vColor = vec4(aVertexColor, 1.0);
+        vColor += ambient+diffuse+specular;
        //vColor = diffuse; 
        // vColor = specular; 
 
 //      vColor = vec4(eye_vector, 1.0); 
-//      vColor = vec4(aVertexColor, 1.0);
 //      vColor = vec4(aVertexNormal, 1.0);
 //      vColor = vec4(v_normal, 1.0);
 
