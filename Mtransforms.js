@@ -98,8 +98,7 @@ var which_object = 1;
 
 
     function PushMatrix(stack, matrix) {
-        var copy = mat4.create();
-        mat4.set(matrix, copy);
+        var copy = glMatrix.mat4.clone(matrix);
         stack.push(copy);
     }
 
@@ -176,12 +175,12 @@ var which_object = 1;
           var diffY = mouseY - lastMouseY;
 
 	    console.log("rotate"+degToRad(diffX/5.0));
-	    if (which_object == 1)
-	     mvMatrix1 = mat4.rotate(mvMatrix1, degToRad(diffX/5.0), [0, 0, 1]);
+       if (which_object == 1)
+         glMatrix.mat4.rotate(mvMatrix1, mvMatrix1, degToRad(diffX/5.0), [0, 0, 1]);
     	 if (which_object == 2) 
-	     mvMatrix2 = mat4.rotate(mvMatrix2, degToRad(diffX/5.0), [0, 0, 1]);
+	       glMatrix.mat4.rotate(mvMatrix2, mvMatrix2, degToRad(diffX/5.0), [0, 0, 1]);
     	 if (which_object == 3) 
-	     mvMatrix3 = mat4.rotate(mvMatrix3, degToRad(diffX/5.0), [0, 0, 1]);	 
+	       glMatrix.mat4.rotate(mvMatrix3, mvMatrix3, degToRad(diffX/5.0), [0, 0, 1]);	 
 	 
           lastMouseX = mouseX;
           lastMouseY = mouseY;
@@ -210,60 +209,60 @@ var which_object = 1;
               if (event.shiftKey) {
                   console.log('enter X');
 		  if (which_object == 1)
-		      mvMatrix1 = mat4.translate(mvMatrix1, [0.1, 0, 0]);		  		      
+		      glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [0.1, 0, 0]);		  		      
 		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [0.1, 0, 0]);		  		      		      
+		      glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.1, 0, 0]);		  		      		      
 		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [0.1, 0, 0]);		  		      		      
+		      glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.1, 0, 0]);		  		      		      
               }
               else {
 		  console.log('enter x');
 		  if (which_object == 1)
-		      mvMatrix1 = mat4.translate(mvMatrix1, [-0.1, 0, 0]);		  		      
+		      glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [-0.1, 0, 0]);		  		      
 		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [-0.1, 0, 0]);		  		      		      
+		      glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [-0.1, 0, 0]);		  		      		      
 		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [-0.1, 0, 0]);
+		      glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [-0.1, 0, 0]);
               }
          break;
          case 89:
               if (event.shiftKey) {
                   console.log('enter Y');
 		  if (which_object == 1)
-		      mvMatrix1 = mat4.translate(mvMatrix1, [0.0, 0.1, 0]);		  		      
+		      glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [0.0, 0.1, 0]);		  		      
 		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [0.0, 0.1, 0]);		  		      		      
+		      glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.0, 0.1, 0]);		  		      		      
 		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [0.0, 0.1, 0]);
+		      glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.0, 0.1, 0]);
               }
               else {
 		  console.log('enter y');
 		  if (which_object == 1)		  
-		      mvMatrix1 = mat4.translate(mvMatrix1, [0.0, -0.1, 0]);		  		      
+		      glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [0.0, -0.1, 0]);		  		      
 		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [0.0, -0.1, 0]);		  		      		      
+		      glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.0, -0.1, 0]);		  		      		      
 		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [0.0, -0.1, 0]);
+		      glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.0, -0.1, 0]);
               }
           break;
          case 83:
               if (event.shiftKey) {
                   console.log('enter S');
 		  if (which_object == 1)
-		      mvMatrix1 = mat4.scale(mvMatrix1, [1.05, 1.05, 1.05]);		  		  		      
+		      glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [1.05, 1.05, 1.05]);		  		  		      
 		  if (which_object == 2)
-		      mvMatrix2 = mat4.scale(mvMatrix2, [1.05, 1.05, 1.05]);		  		  		      		      
+		      glMatrix.mat4.scale(mvMatrix2, mvMatrix2, [1.05, 1.05, 1.05]);		  		  		      		      
 		  if (which_object == 3)
-		      mvMatrix3 = mat4.scale(mvMatrix3, [1.05, 1.05, 1.05]);		  		  		      		      		      
+		      glMatrix.mat4.scale(mvMatrix3, mvMatrix3, [1.05, 1.05, 1.05]);		  		  		      		      		      
               }
               else {
 		  console.log('enter s');
 		  if (which_object == 1)
-		      mvMatrix1 = mat4.scale(mvMatrix1, [0.95, 0.95, 0.95]);		  		  		  		      
+		      glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [0.95, 0.95, 0.95]);		  		  		  		      
 		  if (which_object == 2)
-		      mvMatrix2 = mat4.scale(mvMatrix2, [0.95, 0.95, 0.95]);		  		  		  		      		      
+		      glMatrix.mat4.scale(mvMatrix2, mvMatrix2, [0.95, 0.95, 0.95]);		  		  		  		      		      
 		  if (which_object == 3)
-		      mvMatrix3 = mat4.scale(mvMatrix3, [0.95, 0.95, 0.95]);		  		  		  		      		      		      
+		      glMatrix.mat4.scale(mvMatrix3, mvMatrix3, [0.95, 0.95, 0.95]);		  		  		  		      		      		      
               }
               break; 
        }
@@ -294,19 +293,19 @@ var which_object = 1;
         document.addEventListener('mousedown', onDocumentMouseDown,false);
 	    document.addEventListener('keydown', onKeyDown, false);
 
-	    mvMatrix1 = mat4.create(); 
-	    mat4.identity(mvMatrix1);
-	    mvMatrix1 = mat4.translate(mvMatrix1, [-0.75, -0.75, 0]);
-        mvMatrix1 = mat4.scale(mvMatrix1, [0.25, 0.25, 0.25]); 
+	    mvMatrix1 = glMatrix.mat4.create(); 
+	    glMatrix.mat4.identity(mvMatrix1);
+	    glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [-0.75, -0.75, 0]);
+      glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [0.25, 0.25, 0.25]); 
 
-	    mvMatrix2 = mat4.create(); 
-        mat4.identity(mvMatrix2);
-        mvMatrix2 = mat4.scale(mvMatrix2, [0.25, 0.25, 0.25]); 			       
+	    mvMatrix2 = glMatrix.mat4.create(); 
+      glMatrix.mat4.identity(mvMatrix2);
+      glMatrix.mat4.scale(mvMatrix2, mvMatrix2, [0.25, 0.25, 0.25]); 			       
 
-	    mvMatrix3 = mat4.create(); 
-        mat4.identity(mvMatrix3);
-        mvMatrix3 = mat4.translate(mvMatrix3, [0.75, 0.75, 0]);
-        mvMatrix3 = mat4.scale(mvMatrix3, [0.25, 0.25, 0.25]); 							  
+	    mvMatrix3 = glMatrix.mat4.create(); 
+      glMatrix.mat4.identity(mvMatrix3);
+      glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.75, 0.75, 0]);
+      glMatrix.mat4.scale(mvMatrix3, mvMatrix3, [0.25, 0.25, 0.25]); 							  
 				   
         drawScene();
     }
@@ -320,17 +319,17 @@ function BG(red, green, blue) {
 
 function redraw() {
 
-    mat4.identity(mvMatrix1);
-    mat4.identity(mvMatrix2);
-    mat4.identity(mvMatrix3);
+    glMatrix.mat4.identity(mvMatrix1);
+    glMatrix.mat4.identity(mvMatrix2);
+    glMatrix.mat4.identity(mvMatrix3);
 
-    mvMatrix1 = mat4.translate(mvMatrix1, [-0.25, -0.25, 0]);  // place the 3 cubes in different locations 
-    mvMatrix1 = mat4.scale(mvMatrix1, [0.25, 0.25, 0.25]); 
+    glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [-0.25, -0.25, 0]);  // place the 3 cubes in different locations 
+    glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [0.25, 0.25, 0.25]); 
 
-    mvMatrix2 = mat4.scale(mvMatrix2, [0.25, 0.25, 0.25]); 			       
+    glMatrix.mat4.scale(mvMatrix2, mvMatrix2, [0.25, 0.25, 0.25]); 			       
 
-    mvMatrix3 = mat4.translate(mvMatrix3, [0.25, 0.25, 0]);
-    mvMatrix3 = mat4.scale(mvMatrix3, [0.25, 0.25, 0.25]);
+    glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.25, 0.25, 0]);
+    glMatrix.mat4.scale(mvMatrix3, mvMatrix3, [0.25, 0.25, 0.25]);
 
     drawScene();
 }
