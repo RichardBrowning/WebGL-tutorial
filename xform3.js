@@ -70,7 +70,7 @@ var draw_type=2;
     ///////////////////////////////////////////////////////////////
 
 
-    var mvMatrix = mat4.create();
+    var mvMatrix = glMatrix.mat4.create();
 
      function degToRad(degrees) {
         return degrees * Math.PI / 180;
@@ -122,40 +122,39 @@ var draw_type=2;
         var color = [1.0, 1.0, 1.0, 1.0]; 
 
         // draw a original first 
-        var oMatrix = mat4.create(); 
-        mat4.identity(oMatrix);
-        oMatrix = mat4.translate(oMatrix, [0, 0, 0]); 
-        oMatrix = mat4.scale(oMatrix, [0.05, 0.05, 1.0]); 
+        var oMatrix = glMatrix.mat4.create(); 
+        glMatrix.mat4.identity(oMatrix);
+        glMatrix.mat4.translate(oMatrix, oMatrix, [0, 0, 0]); 
+        glMatrix.mat4.scale(oMatrix, oMatrix, [0.05, 0.05, 1.0]); 
         color = [1.0, 0, 0.0, 1.0]; 
         drawbox(oMatrix, color, true); 
       
-        var model = mat4.create(); 
-        mat4.identity(model); 
-        
-        model = mat4.multiply(model, mvMatrix); 
-        model =  mat4.scale(model, [2,0.5,1]); 
+        var model = glMatrix.mat4.create(); 
+        glMatrix.mat4.identity(model); 
+        glMatrix.mat4.multiply(model, mvMatrix, model); 
+        glMatrix.mat4.scale(model, model, [2,0.5,1]); 
        // now draw a little box 
         color = [1.0, 1.0, 0.0, 1.0]; 
         drawbox(model, color, drawAxis); 
-        model = mat4.scale(model, [0.5, 2, 1]); 
+        glMatrix.mat4.scale(model, model, [0.5, 2, 1]); 
 
         // now draw the second  box 
-        model = mat4.translate(model, [1,0,0]); 
-        model = mat4.rotate(model, degToRad(degree2), [0,0,1]); 
-        model = mat4.translate(model, [.75,0,0]); 
-        model = mat4.scale(model, [1.5, .5, 1]); 
+        glMatrix.mat4.translate(model, model, [1,0,0]); 
+        glMatrix.mat4.rotate(model, model, degToRad(degree2), [0,0,1]); 
+        glMatrix.mat4.translate(model, model, [.75,0,0]); 
+        glMatrix.mat4.scale(model, model, [1.5, .5, 1]); 
         color = [0.0, 0.0, 1.0, 1.0]; 
         drawbox(model, color, drawAxis); 
-        model = mat4.scale(model, [1/1.5, 1/0.5, 1]); 
+        glMatrix.mat4.scale(model, model, [1/1.5, 1/0.5, 1]); 
 
         // now draw the third box 
-        model = mat4.translate(model, [.75,0,0]); 
-        model = mat4.rotate(model, degToRad(degree3), [0,0,1]); 
-        model = mat4.translate(model, [.6,0,0]); 
-        model = mat4.scale(model, [1.2, .5, 1]); 
+        glMatrix.mat4.translate(model, model, [.75,0,0]); 
+        glMatrix.mat4.rotate(model, model, degToRad(degree3), [0,0,1]); 
+        glMatrix.mat4.translate(model, model, [.6,0,0]); 
+        glMatrix.mat4.scale(model, model, [1.2, .5, 1]); 
         color = [1.0, 0.0, 0.0, 1.0]; 
         drawbox(model, color, drawAxis); 
-        model = mat4.scale(model, [1/1.2, 1/0.5, 1]); 
+        glMatrix.mat4.scale(model, model, [1/1.2, 1/0.5, 1]); 
 
     }
 
@@ -229,10 +228,10 @@ var Z_angle =0;
        false); 
        document.addEventListener('keydown', onKeyDown, false);
 
-       mvMatrix = mat4.create(); 
-       mat4.identity(mvMatrix);
-       mvMatrix = mat4.translate(mvMatrix, [-0.5, 0, 0]); 
-       mvMatrix = mat4.scale(mvMatrix, [0.2, 0.2, 0.2]); 
+       mvMatrix = glMatrix.mat4.create(); 
+       glMatrix.mat4.identity(mvMatrix);
+       glMatrix.mat4.translate(mvMatrix, mvMatrix, [-0.5, 0, 0]); 
+       glMatrix.mat4.scale(mvMatrix, mvMatrix, [0.2, 0.2, 0.2]); 
 
        drawScene();
     }
@@ -275,11 +274,11 @@ var degree3 = 0;
          case 82:
               if (event.shiftKey) {
                   console.log('enter R');
-                  mvMatrix = mat4.rotate(mvMatrix, degToRad(5.0), [0, 0, 1]); 
+                  glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(5.0), [0, 0, 1]); 
               }
               else {
                 console.log('enter r');
-                //mvMatrix = mat4.rotate(mvMatrix, degToRad(-5.0), [0, 0, 1]); 
+                // glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(-5.0), [0, 0, 1]); 
                 degree2 += 10; 
               }
           break;
@@ -290,30 +289,30 @@ var degree3 = 0;
         case 88:
             if (event.shiftKey) {
                 console.log('enter X');
-                mvMatrix = mat4.translate(mvMatrix, [0.1, 0, 0]);	
+                glMatrix.mat4.translate(mvMatrix, mvMatrix, [0.1, 0, 0]);	
             }	  		      
             else {
-             mvMatrix = mat4.translate(mvMatrix, [-0.1, 0, 0]);		  		      
+                glMatrix.mat4.translate(mvMatrix, mvMatrix, [-0.1, 0, 0]);		  		      
             }
         break;
        case 89:
             if (event.shiftKey) {
                 console.log('enter Y');
-                mvMatrix = mat4.translate(mvMatrix, [0.0, 0.1, 0]);		  		      
+                glMatrix.mat4.translate(mvMatrix, mvMatrix, [0.0, 0.1, 0]);		  		      
             }
             else {
                 console.log('enter y');
-                mvMatrix = mat4.translate(mvMatrix, [0.0, -0.1, 0]);		  		      
+                glMatrix.mat4.translate(mvMatrix, mvMatrix, [0.0, -0.1, 0]);		  		      
             }
         break;
        case 83:
             if (event.shiftKey) {
                 console.log('enter S');
-                mvMatrix = mat4.scale(mvMatrix, [1.05, 1.05, 1.05]);		  		  		        		  		      		      		      
+                glMatrix.mat4.scale(mvMatrix, mvMatrix, [1.05, 1.05, 1.05]);		  		  		        		  		      		      		      
             }
             else {
                 console.log('enter s');
-                mvMatrix = mat4.scale(mvMatrix, [0.95, 0.95, 0.95]);		  		  		  		     	  		  		  		      		      		      
+                glMatrix.mat4.scale(mvMatrix, mvMatrix, [0.95, 0.95, 0.95]);		  		  		  		     	  		  		  		      		      		      
             }
             break; 
       }
