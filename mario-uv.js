@@ -11,17 +11,16 @@ var draw_type=2;
 
 var tex; // texture
 
+// set up the parameters for lighting 
+var light_ambient = [0,0,0,1]; 
+var light_diffuse = [0.1,0.1,0.1,1];
+var light_specular = [1,1,1,1]; 
+var light_pos = [0,0,0,1];   // eye space position 
 
-  // set up the parameters for lighting 
-  var light_ambient = [0,0,0,1]; 
-  var light_diffuse = [0.1,0.1,0.1,1];
-  var light_specular = [1,1,1,1]; 
-  var light_pos = [0,0,0,1];   // eye space position 
-
-  var mat_ambient = [0, 0, 0, 1]; 
-  var mat_diffuse= [0.8, 0.8, 0.8, 1]; 
-  var mat_specular = [0.2, 0.2, 0.2, 1]; 
-  var mat_shine = [50]; 
+var mat_ambient = [0, 0, 0, 1]; 
+var mat_diffuse= [0.8, 0.8, 0.8, 1]; 
+var mat_specular = [0.2, 0.2, 0.2, 1]; 
+var mat_shine = [50]; 
 
 function isPowerOf2(value) {
   return (value & (value - 1)) === 0;
@@ -93,7 +92,7 @@ function loadTexture(gl, url) { // https://developer.mozilla.org/en-US/docs/Web/
 
     function initGL(canvas) {
         try {
-            gl = canvas.getContext("experimental-webgl");
+            gl = canvas.getContext("webgl2");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
         } catch (e) {
@@ -252,23 +251,22 @@ function handleLoadedTeapot(teapotData)
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 
-    var mMatrix = mat4.create();  // model matrix
-    var vMatrix = mat4.create(); // view matrix
-    var pMatrix = mat4.create();  //projection matrix
-    var nMatrix = mat4.create();  // normal matrix
-    var Z_angle = 0.0;
+var mMatrix = glMatrix.mat4.create();  // model matrix
+var vMatrix = glMatrix.mat4.create(); // view matrix
+var pMatrix = glMatrix.mat4.create();  //projection matrix
+var nMatrix = glMatrix.mat4.create();  // normal matrix
+var Z_angle = 0.0;
 
-    function setMatrixUniforms() {
-        gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-        gl.uniformMatrix4fv(shaderProgram.vMatrixUniform, false, vMatrix);
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);	
-	
-    }
+function setMatrixUniforms() {
+    gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
+    gl.uniformMatrix4fv(shaderProgram.vMatrixUniform, false, vMatrix);
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);	
+}
 
-     function degToRad(degrees) {
-        return degrees * Math.PI / 180;
-     }
+ function degToRad(degrees) {
+    return degrees * Math.PI / 180;
+ }
 
 ///////////////////////////////////////////////////////////////
 
@@ -283,24 +281,24 @@ function drawScene() {
             return;
         }
 
-	pMatrix = mat4.perspective(60, 1.0, 0.1, 100, pMatrix);  // set up the projection matrix 
+	glMatrix.mat4.perspective(pMatrix, 30, 1.0, 0.1, 100);  // set up the projection matrix 
 
-	vMatrix = mat4.lookAt([0,0,5], [0,0,0], [0,1,0], vMatrix);	// set up the view matrix, multiply into the modelview matrix
+	glMatrix.mat4.lookAt(vMatrix, [0,0,5], [0,0,0], [0,-1,0]);	// set up the view matrix, multiply into the modelview matrix
 
-        mat4.identity(mMatrix);
+    glMatrix.mat4.identity(mMatrix);
 
 
-        mMatrix = mat4.scale(mMatrix, [2.0, 2.0, 2.0]); 
+    glMatrix.mat4.scale(mMatrix, mMatrix, [2.0, 2.0, 2.0]); 
 	
-        mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 0]);   // now set up the model matrix
+    glMatrix.mat4.rotate(mMatrix, mMatrix, degToRad(Z_angle), [0, 1, 0]);   // now set up the model matrix
 
-	mat4.identity(nMatrix); 
-	nMatrix = mat4.multiply(nMatrix, vMatrix);
-	nMatrix = mat4.multiply(nMatrix, mMatrix); 	
-	nMatrix = mat4.inverse(nMatrix);
-	nMatrix = mat4.transpose(nMatrix); 
+	glMatrix.mat4.identity(nMatrix); 
+	glMatrix.mat4.multiply(nMatrix, nMatrix, mMatrix); 	
+    glMatrix.mat4.multiply(nMatrix, nMatrix, vMatrix);
+	glMatrix.mat4.invert(nMatrix, nMatrix);
+	glMatrix.mat4.transpose(nMatrix, nMatrix); 
 
-        shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
+    shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
 
 	gl.uniform4f(shaderProgram.light_posUniform,light_pos[0], light_pos[1], light_pos[2], light_pos[3]); 	
 	gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0); 
@@ -337,107 +335,107 @@ function drawScene() {
     else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, teapotVertexPositionBuffer.numItems);
 	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems , gl.UNSIGNED_SHORT, 0);	
 
-    }
+}
 
 
-    ///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-     var lastMouseX = 0, lastMouseY = 0;
+ var lastMouseX = 0, lastMouseY = 0;
 
-    ///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-     function onDocumentMouseDown( event ) {
-          event.preventDefault();
-          document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.addEventListener( 'mouseout', onDocumentMouseOut, false );
-          var mouseX = event.clientX;
-          var mouseY = event.clientY;
+ function onDocumentMouseDown( event ) {
+      event.preventDefault();
+      document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+      document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+      document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+      var mouseX = event.clientX;
+      var mouseY = event.clientY;
 
-          lastMouseX = mouseX;
-          lastMouseY = mouseY; 
+      lastMouseX = mouseX;
+      lastMouseY = mouseY; 
 
-      }
+  }
 
-     function onDocumentMouseMove( event ) {
-          var mouseX = event.clientX;
-          var mouseY = event.ClientY; 
+ function onDocumentMouseMove( event ) {
+      var mouseX = event.clientX;
+      var mouseY = event.ClientY; 
 
-          var diffX = mouseX - lastMouseX;
-          var diffY = mouseY - lastMouseY;
+      var diffX = mouseX - lastMouseX;
+      var diffY = mouseY - lastMouseY;
 
-          Z_angle = Z_angle + diffX/5;
+      Z_angle = Z_angle + diffX/5;
 
-          lastMouseX = mouseX;
-          lastMouseY = mouseY;
+      lastMouseX = mouseX;
+      lastMouseY = mouseY;
 
-          drawScene();
-     }
+      drawScene();
+ }
 
-     function onDocumentMouseUp( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-     }
+ function onDocumentMouseUp( event ) {
+      document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+      document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+      document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+ }
 
-     function onDocumentMouseOut( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-     }
+ function onDocumentMouseOut( event ) {
+      document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+      document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+      document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+ }
 
-    ///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-    function webGLStart() {
-        var canvas = document.getElementById("code12-canvas");
-        initGL(canvas);
-        initShaders();
+function webGLStart() {
+    var canvas = document.getElementById("code12-canvas");
+    initGL(canvas);
+    initShaders();
 
-	    gl.enable(gl.DEPTH_TEST); 
+    gl.enable(gl.DEPTH_TEST); 
 
-        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-        shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-        gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-	
-        shaderProgram.vertexTextureCoordAttribute = gl.getAttribLocation(shaderProgram, "aVertexTextureCoord");
-        gl.enableVertexAttribArray(shaderProgram.vertexTextureCoordAttribute);
+    shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+    gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
-        // shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-        // gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-	
-        shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
-        shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
-	    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");	
+    shaderProgram.vertexTextureCoordAttribute = gl.getAttribLocation(shaderProgram, "aVertexTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.vertexTextureCoordAttribute);
 
-        shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
-        shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");	
-        shaderProgram.diffuse_coefUniform = gl.getUniformLocation(shaderProgram, "diffuse_coef");
-        shaderProgram.specular_coefUniform = gl.getUniformLocation(shaderProgram, "specular_coef");
-        shaderProgram.shininess_coefUniform = gl.getUniformLocation(shaderProgram, "mat_shininess");
+    // shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    // gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
-        shaderProgram.light_ambientUniform = gl.getUniformLocation(shaderProgram, "light_ambient");	
-        shaderProgram.light_diffuseUniform = gl.getUniformLocation(shaderProgram, "light_diffuse");
-        shaderProgram.light_specularUniform = gl.getUniformLocation(shaderProgram, "light_specular");	
+    shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
+    shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
+    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");	
 
-        shaderProgram.tex = gl.getUniformLocation(shaderProgram, "tex");
+    shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
+    shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");	
+    shaderProgram.diffuse_coefUniform = gl.getUniformLocation(shaderProgram, "diffuse_coef");
+    shaderProgram.specular_coefUniform = gl.getUniformLocation(shaderProgram, "specular_coef");
+    shaderProgram.shininess_coefUniform = gl.getUniformLocation(shaderProgram, "mat_shininess");
 
-	    initJSON(); 	
+    shaderProgram.light_ambientUniform = gl.getUniformLocation(shaderProgram, "light_ambient");	
+    shaderProgram.light_diffuseUniform = gl.getUniformLocation(shaderProgram, "light_diffuse");
+    shaderProgram.light_specularUniform = gl.getUniformLocation(shaderProgram, "light_specular");	
 
-        tex = loadTexture(gl, 'mario.jpg');
+    shaderProgram.tex = gl.getUniformLocation(shaderProgram, "tex");
 
-        gl.clearColor(1.0, 1.0, 1.0, 1.0);
-        // console.log('start! ');
-        // console.error('I hope no error ....');
+    initJSON(); 	
 
-       document.addEventListener('mousedown', onDocumentMouseDown,
-       false); 
+    tex = loadTexture(gl, 'mario.jpg');
 
-	// console.error("draw");
-        drawScene();
-    }
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    // console.log('start! ');
+    // console.error('I hope no error ....');
+
+   document.addEventListener('mousedown', onDocumentMouseDown,
+   false); 
+
+// console.error("draw");
+    drawScene();
+}
 
 function BG(red, green, blue) {
 
