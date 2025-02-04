@@ -44,27 +44,27 @@ var which_object = 1;
 
         vertices = [
              0.5,  0.5,  0.0,
-	    	-0.5,  0.5,  0.0,
+            -0.5,  0.5,  0.0,
             -0.5, -0.5,  0.0, 
             0.5,  0.5,  0.0,
             -0.5, -0.5,  0.0, 
              0.5, -0.5,  0.0,
         ];
 
-	l_vertices = [
+    l_vertices = [
             0.0,  0.0,  0.0,
-	    	0.7,  0.0,  0.0,
-	        0.0, 0.0,  0.0, 
+            0.7,  0.0,  0.0,
+            0.0, 0.0,  0.0, 
             0.0, 0.7,  0.0,
         ];
-	
+    
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
         squareVertexPositionBuffer.numItems = 6;
 
-	    lineVertexPositionBuffer = gl.createBuffer();
+        lineVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, lineVertexPositionBuffer);
-    	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(l_vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(l_vertices), gl.STATIC_DRAW);
         lineVertexPositionBuffer.itemSize = 3;
         lineVertexPositionBuffer.numItems = 4;
 
@@ -104,9 +104,8 @@ var which_object = 1;
 
 
     function PushMatrix(stack, matrix) {
-        var copy = mat4.create();
-        mat4.set(matrix, copy);
-        stack.push(copy);
+       var copy = glMatrix.mat4.clone(matrix);  //necessary because javascript only does shallow push 
+       stack.push(copy); 
     }
 
     function PopMatrix(stack, copy) {
@@ -121,21 +120,20 @@ var which_object = 1;
 
     function draw_square(matrix) {
 
-        setMatrixUniforms(matrix);	
+        setMatrixUniforms(matrix);  
 
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,squareVertexColorBuffer.itemSize,gl.FLOAT,false, 0, 0);
-    	gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numItems);
-	
+          gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numItems);
+    
 
         gl.bindBuffer(gl.ARRAY_BUFFER, lineVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, lineVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,squareVertexColorBuffer.itemSize,gl.FLOAT,false, 0, 0);
-    	gl.drawArrays(gl.LINES, 0, lineVertexPositionBuffer.numItems);
-
+          gl.drawArrays(gl.LINES, 0, lineVertexPositionBuffer.numItems);
     }
 
 
@@ -147,22 +145,22 @@ var which_object = 1;
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	var Mstack = []; 
-        var model = mat4.create(); 
-    	mat4.identity(model); 
-	
-        model = mat4.multiply(model, mvMatrix1); 
-    	draw_square(model);
+        var Mstack = []; 
+        var model = glMatrix.mat4.create(); 
+        glMatrix.mat4.identity(model); 
+    
+        glMatrix.mat4.multiply(model, mvMatrix1, model); 
+        draw_square(model);
 
-	PushMatrix(Mstack, model); 
-    	console.log("push matrix"); 
+        PushMatrix(Mstack, model); 
+        console.log("push matrix"); 
 
-        model = mat4.multiply(model, mvMatrix2); 
-    	draw_square(model);
+        glMatrix.mat4.multiply(model, mvMatrix2, model); 
+        draw_square(model);
 
-	PoPMatrix(Mstack, model).     
-        model = mat4.multiply(model, mvMatrix3); 
-    	draw_square(model);
+        PopMatrix(Mstack, model);
+        glMatrix.mat4.multiply(model, mvMatrix3, model); 
+        draw_square(model);
     }
 
 
@@ -173,49 +171,48 @@ var which_object = 1;
 
     ///////////////////////////////////////////////////////////////
 
-     function onDocumentMouseDown( event ) {
-          event.preventDefault();
-          document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.addEventListener( 'mouseout', onDocumentMouseOut, false );
-          var mouseX = event.clientX;
-          var mouseY = event.clientY;
+    function onDocumentMouseDown( event ) {
+        event.preventDefault();
+        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+        document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+        var mouseX = event.clientX;
+        var mouseY = event.clientY;
+        lastMouseX = mouseX;
+        lastMouseY = mouseY; 
+    }
 
-          lastMouseX = mouseX;
-          lastMouseY = mouseY; 
-      }
+    function onDocumentMouseMove( event ) {
+        var mouseX = event.clientX;
+        var mouseY = event.ClientY; 
 
-     function onDocumentMouseMove( event ) {
-          var mouseX = event.clientX;
-          var mouseY = event.ClientY; 
+        var diffX = mouseX - lastMouseX;
+        var diffY = mouseY - lastMouseY;
 
-          var diffX = mouseX - lastMouseX;
-          var diffY = mouseY - lastMouseY;
+        console.log("rotate"+degToRad(diffX/5.0));
+        if (which_object == 1)
+        glMatrix.mat4.rotate(mvMatrix1, mvMatrix1, degToRad(diffX/5.0), [0, 0, 1]);
+        if (which_object == 2) 
+        glMatrix.mat4.rotate(mvMatrix2, mvMatrix2, degToRad(diffX/5.0), [0, 0, 1]);
+        if (which_object == 3) 
+        glMatrix.mat4.rotate(mvMatrix3, mvMatrix3, degToRad(diffX/5.0), [0, 0, 1]);     
+     
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
 
-	 console.log("rotate"+degToRad(diffX/5.0));
-    	 if (which_object == 1)
-	     mvMatrix1 = mat4.rotate(mvMatrix1, degToRad(diffX/5.0), [0, 0, 1]);
-    	 if (which_object == 2) 
-	     mvMatrix2 = mat4.rotate(mvMatrix2, degToRad(diffX/5.0), [0, 0, 1]);
-    	 if (which_object == 3) 
-	     mvMatrix3 = mat4.rotate(mvMatrix3, degToRad(diffX/5.0), [0, 0, 1]);	 
-	 
-          lastMouseX = mouseX;
-          lastMouseY = mouseY;
-
-          drawScene();
+        drawScene();
      }
 
      function onDocumentMouseUp( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+        document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+        document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
      }
 
      function onDocumentMouseOut( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+        document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+        document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+        document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
      }
 
 
@@ -226,61 +223,61 @@ var which_object = 1;
          case 88:
               if (event.shiftKey) {
                   console.log('enter X');
-		  if (which_object == 1)
-		      mvMatrix1 = mat4.translate(mvMatrix1, [0.1, 0, 0]);		  		      
-		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [0.1, 0, 0]);		  		      		      
-		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [0.1, 0, 0]);		  		      		      
+          if (which_object == 1)
+              glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [0.1, 0, 0]);                     
+          if (which_object == 2)
+              glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.1, 0, 0]);                                 
+          if (which_object == 3)
+              glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.1, 0, 0]);                                 
               }
               else {
-		  console.log('enter x');
-		  if (which_object == 1)
-		      mvMatrix1 = mat4.translate(mvMatrix1, [-0.1, 0, 0]);		  		      
-		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [-0.1, 0, 0]);		  		      		      
-		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [-0.1, 0, 0]);
+          console.log('enter x');
+          if (which_object == 1)
+              glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [-0.1, 0, 0]);                    
+          if (which_object == 2)
+              glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [-0.1, 0, 0]);                                
+          if (which_object == 3)
+              glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [-0.1, 0, 0]);
               }
          break;
          case 89:
               if (event.shiftKey) {
                   console.log('enter Y');
-		  if (which_object == 1)
-		      mvMatrix1 = mat4.translate(mvMatrix1, [0.0, 0.1, 0]);		  		      
-		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [0.0, 0.1, 0]);		  		      		      
-		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [0.0, 0.1, 0]);
+          if (which_object == 1)
+              glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [0.0, 0.1, 0]);                   
+          if (which_object == 2)
+              glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.0, 0.1, 0]);                               
+          if (which_object == 3)
+              glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.0, 0.1, 0]);
               }
               else {
-		  console.log('enter y');
-		  if (which_object == 1)		  
-		      mvMatrix1 = mat4.translate(mvMatrix1, [0.0, -0.1, 0]);		  		      
-		  if (which_object == 2)
-		      mvMatrix2 = mat4.translate(mvMatrix2, [0.0, -0.1, 0]);		  		      		      
-		  if (which_object == 3)
-		      mvMatrix3 = mat4.translate(mvMatrix3, [0.0, -0.1, 0]);
+          console.log('enter y');
+          if (which_object == 1)          
+              glMatrix.mat4.translate(mvMatrix1, mvMatrix1, [0.0, -0.1, 0]);                      
+          if (which_object == 2)
+              glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.0, -0.1, 0]);                                  
+          if (which_object == 3)
+              glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.0, -0.1, 0]);
               }
           break;
          case 83:
               if (event.shiftKey) {
                   console.log('enter S');
-		  if (which_object == 1)
-		      mvMatrix1 = mat4.scale(mvMatrix1, [1.05, 1.05, 1.05]);		  		  		      
-		  if (which_object == 2)
-		      mvMatrix2 = mat4.scale(mvMatrix2, [1.05, 1.05, 1.05]);		  		  		      		      
-		  if (which_object == 3)
-		      mvMatrix3 = mat4.scale(mvMatrix3, [1.05, 1.05, 1.05]);		  		  		      		      		      
+          if (which_object == 1)
+              glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [1.05, 1.05, 1.05]);                              
+          if (which_object == 2)
+              glMatrix.mat4.scale(mvMatrix2, mvMatrix2, [1.05, 1.05, 1.05]);                                          
+          if (which_object == 3)
+              glMatrix.mat4.scale(mvMatrix3, mvMatrix3, [1.05, 1.05, 1.05]);                                                      
               }
               else {
-		  console.log('enter s');
-		  if (which_object == 1)
-		      mvMatrix1 = mat4.scale(mvMatrix1, [0.95, 0.95, 0.95]);		  		  		  		      
-		  if (which_object == 2)
-		      mvMatrix2 = mat4.scale(mvMatrix2, [0.95, 0.95, 0.95]);		  		  		  		      		      
-		  if (which_object == 3)
-		      mvMatrix3 = mat4.scale(mvMatrix3, [0.95, 0.95, 0.95]);		  		  		  		      		      		      
+          console.log('enter s');
+          if (which_object == 1)
+              glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [0.95, 0.95, 0.95]);                                      
+          if (which_object == 2)
+              glMatrix.mat4.scale(mvMatrix2, mvMatrix2, [0.95, 0.95, 0.95]);                                                  
+          if (which_object == 3)
+              glMatrix.mat4.scale(mvMatrix3, mvMatrix3, [0.95, 0.95, 0.95]);                                                              
               }
               break; 
        }
@@ -306,20 +303,20 @@ var which_object = 1;
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-    	document.addEventListener('mousedown', onDocumentMouseDown,false);
-    	document.addEventListener('keydown', onKeyDown, false);
+        document.addEventListener('mousedown', onDocumentMouseDown,false);
+        document.addEventListener('keydown', onKeyDown, false);
 
-    	mvMatrix1 = mat4.create(); 
-    	mat4.identity(mvMatrix1);
-        mvMatrix1 = mat4.scale(mvMatrix1, [0.25, 0.25, 0.25]); 
+        mvMatrix1 = glMatrix.mat4.create(); 
+        glMatrix.mat4.identity(mvMatrix1);
+        glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [0.25, 0.25, 0.25]); 
 
-    	mvMatrix2 = mat4.create(); 
-        mat4.identity(mvMatrix2);
-    	mvMatrix1 = mat4.translate(mvMatrix1, [0.5, 0.5, 0]);
+        mvMatrix2 = glMatrix.mat4.create(); 
+        glMatrix.mat4.identity(mvMatrix2);
+        glMatrix.mat4.translate(mvMatrix2, mvMatrix1, [0.5, 0.5, 0]);
 
-    	mvMatrix3 = mat4.create(); 
-        mat4.identity(mvMatrix3);
-        mvMatrix3 = mat4.translate(mvMatrix3, [0.5, 0.5, 0]);
+        mvMatrix3 = glMatrix.mat4.create(); 
+        glMatrix.mat4.identity(mvMatrix3);
+        glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.5, 0.5, 0]);
 
         drawScene();
     }
@@ -337,11 +334,11 @@ function redraw() {
     mat4.identity(mvMatrix2);
     mat4.identity(mvMatrix3);
 
-    mvMatrix1 = mat4.scale(mvMatrix1, [0.25, 0.25, 0.25]); 
+    glMatrix.mat4.scale(mvMatrix1, mvMatrix1, [0.25, 0.25, 0.25]); 
 
-    mvMatrix2 = mat4.translate(mvMatrix2, [0.5, 0.5, 0.25]); 			       
+    glMatrix.mat4.translate(mvMatrix2, mvMatrix2, [0.5, 0.5, 0.25]);                   
 
-    mvMatrix3 = mat4.translate(mvMatrix3, [0.5, 0.5, 0]);
+    glMatrix.mat4.translate(mvMatrix3, mvMatrix3, [0.5, 0.5, 0]);
 
     drawScene();
 }
