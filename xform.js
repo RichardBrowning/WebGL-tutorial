@@ -39,9 +39,9 @@ var draw_type=2;
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         var vertices = [
             0.5,  0.5,  0.0,
-		    -0.5,  0.5,  0.0, 
+            -0.5,  0.5,  0.0, 
             -0.5, -0.5,  0.0,
-	        0.5, -0.5,  0.0,
+            0.5, -0.5,  0.0,
 
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -55,9 +55,9 @@ var draw_type=2;
         gl.bindBuffer(gl.ARRAY_BUFFER, AxesVertexPositionBuffer);
         var vertices = [
             0.0,  0.0,  0.0,
-		    0.0,  1.0,  0.0, 
+            0.0,  1.0,  0.0, 
             0.0,  0.0,  0.0,
-	        1.0,  0.0,  0.0,
+            1.0,  0.0,  0.0,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         AxesVertexPositionBuffer.vertexSize = 3;
@@ -70,7 +70,7 @@ var draw_type=2;
     ///////////////////////////////////////////////////////////////
 
 
-    var mvMatrix = mat4.create();
+    var mvMatrix = glMatrix.mat4.create();
     var Z_angle = 0.0;
     var z_angle = 0.0; 
     var y_trans = 0.0; 
@@ -91,7 +91,7 @@ var draw_type=2;
         gl.uniform4fv(shaderProgram.uColor, color); 
 
         if (draw_type==2) gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numVertices);
-	    else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices);	
+        else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices); 
         else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, squareVertexPositionBuffer.numVertices);
 
      }
@@ -107,11 +107,11 @@ var draw_type=2;
 
         var color = [0,0,1.0, 1.0]; 
         gl.uniform4fv(shaderProgram.uColor, color); 
-        gl.drawArrays(gl.LINES, 0, 2);	// y axis 
+        gl.drawArrays(gl.LINES, 0, 2);  // y axis 
         
         var color = [1,0,0.0, 1.0]; 
         gl.uniform4fv(shaderProgram.uColor, color); 
-        gl.drawArrays(gl.LINES, 2, 2);	// y axis 
+        gl.drawArrays(gl.LINES, 2, 2);  // y axis 
      }
     ///////////////////////////////////////////////////////////////
 
@@ -123,19 +123,19 @@ var draw_type=2;
        var color = [1.0, 1.0, 1.0, 1.0]; 
 
        // draw a original first 
-        mat4.identity(mvMatrix);
-        mvMatrix = mat4.translate(mvMatrix, [0, 0, 0]); 
-       mvMatrix = mat4.scale(mvMatrix, [0.1, 0.1, 0.2]); 
+       glMatrix.mat4.identity(mvMatrix);
+       glMatrix.mat4.translate(mvMatrix, mvMatrix, [0, 0, 0]); 
+       glMatrix.mat4.scale(mvMatrix, mvMatrix, [0.1, 0.1, 0.2]); 
        color = [1.0, 0, 0.0, 1.0]; 
        drawbox(mvMatrix, color); 
        drawAxes(mvMatrix); 
       
        // now draw a little box 
-        mat4.identity(mvMatrix);
-        mvMatrix = mat4.rotate(mvMatrix, degToRad(Z_angle), [0,0,1]); 
-        mvMatrix = mat4.translate(mvMatrix, [-0.5, 0, 0]); 
-        mvMatrix = mat4.rotate(mvMatrix, degToRad(z_angle), [0, 0, 1]); 
-        mvMatrix = mat4.scale(mvMatrix, [0.2, 0.2, 0.2]); 
+        glMatrix.mat4.identity(mvMatrix);
+        glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(Z_angle), [0,0,1]); 
+        glMatrix.mat4.translate(mvMatrix, mvMatrix, [-0.5, 0, 0]); 
+        glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(z_angle), [0, 0, 1]); 
+        glMatrix.mat4.scale(mvMatrix, mvMatrix, [0.2, 0.2, 0.2]); 
         color = [1.0, 1.0, 0.0, 1.0]; 
 
         drawbox(mvMatrix, color); 
@@ -260,5 +260,5 @@ var delta = 0.2;
           break;
       }
 
-	drawScene();	 // draw the VBO 
+    drawScene();     // draw the VBO 
     }
