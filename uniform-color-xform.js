@@ -41,10 +41,9 @@ var draw_type=2;
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         vertices = [
             0.5,  0.5,  0.0,
-		    -0.5,  0.5,  0.0, 
+            -0.5,  0.5,  0.0, 
             -0.5, -0.5,  0.0,
-	        0.5, -0.5,  0.0,
-
+            0.5, -0.5,  0.0,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.vertexSize = 3;
@@ -56,7 +55,7 @@ var draw_type=2;
     ///////////////////////////////////////////////////////////////
 
 
-    var mvMatrix = mat4.create();
+    var mvMatrix = glMatrix.mat4.create();
     var Z_angle = 0.0;
 
      function degToRad(degrees) {
@@ -69,11 +68,11 @@ var draw_type=2;
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.identity(mvMatrix);
+        glMatrix.mat4.identity(mvMatrix);
         console.log('Z angle = '+ Z_angle); 
-        mvMatrix = mat4.translate(mvMatrix, [-0.5, 0, 0]); 
-        mvMatrix = mat4.rotate(mvMatrix, degToRad(Z_angle), [0, 0, 1]); 
-        mvMatrix = mat4.scale(mvMatrix, [0.2, 0.2, 0.2]); 
+        glMatrix.mat4.translate(mvMatrix, mvMatrix, [-0.5, 0, 0]); 
+        glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(Z_angle), [0, 0, 1]); 
+        glMatrix.mat4.scale(mvMatrix, mvMatrix, [0.2, 0.2, 0.2]); 
 
         var offset = 0; 
         var stride = 0; 
@@ -81,21 +80,21 @@ var draw_type=2;
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.vertexSize, gl.FLOAT, false, stride, offset);
 
-       var color = [1.0, 0.0, 0.0, 1.0]; 
+        var color = [1.0, 0.0, 0.0, 1.0]; 
 
-       gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-       gl.uniform4fv(shaderProgram.uColor, color); 
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+        gl.uniform4fv(shaderProgram.uColor, color); 
 
-	    if (draw_type==2) gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numVertices);
-	    else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices);	
+        if (draw_type==2) gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numVertices);
+        else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices); 
         else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, squareVertexPositionBuffer.numVertices);
 
         // draw the second square. Note I am re-using my previous vbo 
-        mat4.identity(mvMatrix);
+        glMatrix.mat4.identity(mvMatrix);
         console.log('Z angle = '+ Z_angle); 
-        mvMatrix = mat4.translate(mvMatrix, [0.5,0,0]); 
-        mvMatrix = mat4.rotate(mvMatrix, -degToRad(Z_angle), [0, 0, 1]); 
-        mvMatrix = mat4.scale(mvMatrix, [0.2, 0.2, 0.2]); 
+        glMatrix.mat4.translate(mvMatrix, mvMatrix, [0.5,0,0]); 
+        glMatrix.mat4.rotate(mvMatrix, mvMatrix, -degToRad(Z_angle), [0, 0, 1]); 
+        glMatrix.mat4.scale(mvMatrix, mvMatrix, [0.2, 0.2, 0.2]); 
 
 
         color = [1,1,0, 1]; 
@@ -103,7 +102,7 @@ var draw_type=2;
         gl.uniform4fv(shaderProgram.uColor, color); 
 
         if (draw_type==2) gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numVertices);
-	    else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices);	
+        else if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numVertices); 
         else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, squareVertexPositionBuffer.numVertices);
 
     }
@@ -219,5 +218,5 @@ function geometry(type) {
           break;
       }
 
-	drawScene();	 // draw the VBO 
+    drawScene();     // draw the VBO 
     }
