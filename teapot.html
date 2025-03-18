@@ -109,7 +109,7 @@ precision mediump float;
 
         gl_Position = uPMatrix*uVMatrix*uMMatrix*vec4(aVertexPosition, 1.0);
 
-      vColor = vertex_color + ambient+diffuse+specular;
+      vColor = ambient+diffuse+specular;
 //      vColor = vec4(eye_vector, 1.0); 
 //      vColor = vec4(aVertexColor,1.0);
 //      vColor = vec4(aVertexNormal, 1.0);
