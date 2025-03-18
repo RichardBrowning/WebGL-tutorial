@@ -14,7 +14,7 @@ var draw_type=2;
   var light_ambient = [0,0,0,1]; 
   var light_diffuse = [.8,.8,.8,1];
   var light_specular = [1,1,1,1]; 
-  var light_pos = [0,0,0,1];   // eye space position 
+  var light_pos = [10,10,10,1];   // eye space position 
 
   var mat_ambient = [0, 0, 0, 1]; 
   var mat_diffuse= [1, 1, 0, 1]; 
