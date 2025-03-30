@@ -6,19 +6,26 @@
 //  Han-Wei Shen (shen.94@osu.edu)
 //
 
+// 声明gl环境
 var gl;
+// 声明着色器程序
 var shaderProgram;
+// ？
 var draw_type=2; 
 
 //////////// Init OpenGL Context etc. ///////////////
 
     function initGL(canvas) {
+        // 尝试：获取实验性webgl环境/上下文；试图设置视口宽度和高度
         try {
             gl = canvas.getContext("experimental-webgl");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
         } catch (e) {
+            // 如果获取出错。先给个log
+            console.log(e);
         }
+        // 如果上面没有成功获取到gl环境，发出alert形警告
         if (!gl) {
             alert("Could not initialise WebGL, sorry :-(");
         }
@@ -26,16 +33,18 @@ var draw_type=2;
 
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////
-
+    // 声明方形顶点位置缓存区
     var squareVertexPositionBuffer;
+    // 声明方形顶点颜色缓存区
     var squareVertexColorBuffer;
+    // 声明方形顶点索引缓存区
     var squareVertexIndexBuffer; 
 
 
    ////////////////    Initialize VBO  ////////////////////////
-
+    // 初始化缓冲区
     function initBuffers() {
-
+        // 创建一个缓冲区对象，赋值给方形顶点位置缓存区，绑定到GL_ARRAY_BUFFER目标上
         squareVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         var vertices = [
